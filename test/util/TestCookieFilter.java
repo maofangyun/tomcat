@@ -20,6 +20,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import org.apache.catalina.authenticator.Constants;
+import util.b.CookieFilter;
 
 public class TestCookieFilter {
 

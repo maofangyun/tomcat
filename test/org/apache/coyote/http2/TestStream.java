@@ -30,9 +30,6 @@ import org.junit.Test;
 import org.apache.catalina.Context;
 import org.apache.catalina.startup.Tomcat;
 
-import trailers.ResponseTrailers;
-
-
 public class TestStream extends Http2TestBase {
 
     /*
