@@ -1244,11 +1244,9 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
                 return clazz;
             }
 
-            // (0.2) Try loading the class with the system class loader, to prevent
-            //       the webapp from overriding Java SE classes. This implements
-            //       SRV.10.7.2
+            //（0.2）尝试使用扩展类加载器加载该类,以防止webapp覆盖Java SE类
             String resourceName = binaryNameToPath(name, false);
-
+            // javaseLoader是扩展类加载器(从parent.getparnet()获取,其中parent是应用类加载器)
             ClassLoader javaseLoader = getJavaseClassLoader();
             boolean tryLoadingFromJavaseLoader;
             try {
@@ -1308,11 +1306,14 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
 
             boolean delegateLoad = delegate || filter(name, true);
 
-            // (1) Delegate to our parent if requested
+            // (1) 代理给parent(即应用类加载器)进行类的加载工作
             if (delegateLoad) {
                 if (log.isDebugEnabled())
                     log.debug("  Delegating to parent classloader1 " + parent);
                 try {
+                    // 会直接调用forName0()的本地方法,不会进入loadClass()的逻辑,即打破了双亲委派的规则
+                    // 和loadClass()的区别:forName()会进行初始化,loadClass()只是单纯的进行加载
+                    // 加载 -> 验证 -> 准备 -> 解析 -> 初始化 -> 使用 -> 卸载
                     clazz = Class.forName(name, false, parent);
                     if (clazz != null) {
                         if (log.isDebugEnabled())
