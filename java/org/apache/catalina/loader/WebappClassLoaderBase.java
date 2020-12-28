@@ -248,13 +248,17 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
         }
         this.parent = p;
 
+        // 获取启动类加载器,返回为null
         ClassLoader j = String.class.getClassLoader();
         if (j == null) {
+            // 获取应用类加载器
             j = getSystemClassLoader();
             while (j.getParent() != null) {
+                // 获取扩展类加载器
                 j = j.getParent();
             }
         }
+        // javaseClassLoader其实是扩展类加载器
         this.javaseClassLoader = j;
 
         securityManager = System.getSecurityManager();
@@ -1225,6 +1229,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
             checkStateForClassLoading(name);
 
             // (0) Check our previously loaded local class cache
+            // 从缓存中查找Class对象是否WebappClassLoader被加载
             clazz = findLoadedClass0(name);
             if (clazz != null) {
                 if (log.isDebugEnabled())
@@ -1235,6 +1240,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
             }
 
             // (0.1) Check our previously loaded class cache
+            // 检查JVM虚拟机中是否加载过该类
             clazz = JreCompat.isGraalAvailable() ? null : findLoadedClass(name);
             if (clazz != null) {
                 if (log.isDebugEnabled())
@@ -1265,8 +1271,10 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
                     PrivilegedAction<URL> dp = new PrivilegedJavaseGetResource(resourceName);
                     url = AccessController.doPrivileged(dp);
                 } else {
+                    // 首先使用扩展类加载器试着获取资源
                     url = javaseLoader.getResource(resourceName);
                 }
+                // 判断资源是否获取成功
                 tryLoadingFromJavaseLoader = (url != null);
             } catch (Throwable t) {
                 // Swallow all exceptions apart from those that must be re-thrown
@@ -1279,6 +1287,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
 
             if (tryLoadingFromJavaseLoader) {
                 try {
+                    // 使用扩展类加载器加载
                     clazz = javaseLoader.loadClass(name);
                     if (clazz != null) {
                         if (resolve)
@@ -2299,6 +2308,7 @@ public abstract class WebappClassLoaderBase extends URLClassLoader
         WebResource resource = null;
 
         if (entry == null) {
+            // 首先查找/WEB-INF/classes目录
             resource = resources.getClassLoaderResource(path);
 
             if (!resource.exists()) {

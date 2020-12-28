@@ -144,9 +144,12 @@ public final class Bootstrap {
             commonLoader = createClassLoader("common", null);
             if (commonLoader == null) {
                 // no config file, default to this loader - we might be in a 'single' env.
+                // common.loader的值为空时,采用应用类加载器
                 commonLoader = this.getClass().getClassLoader();
             }
+            // CommonClassLoader是CatalinaClassLoader的parent
             catalinaLoader = createClassLoader("server", commonLoader);
+            // CommonClassLoader是SharedClassLoader的parent
             sharedLoader = createClassLoader("shared", commonLoader);
         } catch (Throwable t) {
             handleThrowable(t);
@@ -248,8 +251,11 @@ public final class Bootstrap {
      */
     public void init() throws Exception {
 
+        // 初始化三个类加载器:CommonClassLoader,CatalinaClassLoader和SharedClassLoader,
+        // 通常情况下,这三个类加载器的实例都是同一个
         initClassLoaders();
 
+        // 设置线程上下文类加载器
         Thread.currentThread().setContextClassLoader(catalinaLoader);
 
         SecurityClassLoad.securityClassLoad(catalinaLoader);

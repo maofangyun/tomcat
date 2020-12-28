@@ -414,6 +414,7 @@ public class WebappLoader extends LifecycleMBeanBase implements Loader{
         }
 
         if (ParallelWebappClassLoader.class.getName().equals(loaderClass)) {
+            // 每一个context实例化一个ParallelWebappClassLoader实例,并且传递了SharedClassLoader作为其父类加载器
             return new ParallelWebappClassLoader(context.getParentClassLoader());
         }
 
